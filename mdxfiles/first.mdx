@@ -1,0 +1,307 @@
+---
+title: Blog with NextJs, Tailwind and Markdown
+summary: |
+  Developing a blog using NextJs, Tailwind and Markdown.
+  Thi current website has been develop using the instructions on this blog.
+date: 2022-04-26T04:25:44.799Z
+---
+
+The current webpage has been develop using the instructions on this blog.
+
+This guide follows Harry Wolf's youtube tutorial video with some personal modifications we added.
+
+Please watch and subscribe to his YouTube Channel:
+
+[![IMAGE_ALT](https://img.youtube.com/vi/vu9gPcPs3mY/2.jpg)](https://www.youtube.com/watch?v=vu9gPcPs3mY)
+
+You will find the code on my public repository as well as the fork/pull request changes requested to the original author.
+
+<h2>Requirements</h2>
+As you can tell by looking at my projects I use "vim" as a personal editor and use command line for most setups.
+
+Feel free to use any editor, but if you follow this tutorial expect no other tools.
+
+For this specific project we will use the following:
+
+```
+- Node v18.0.0
+- NextJs v11.1.0
+- React 17.0.2
+- Tailwindcss 3.0.24
+- nextjs-mdx-remote from harshicorp
+- Other NPM packages: date-fns, gray-matter
+```
+
+<h2>The setup</h2>
+
+Make sure you have the latest [node](https://nodejs.org/en/download/current/) installed:
+
+```
+$ node --version
+v18.0.0
+```
+
+Let's create a new [NextJs](https://nextjs.org/docs) project:
+
+```
+$ npx create-next-app@latest dev-blogs
+```
+
+---
+
+### Downgrading to React 17
+
+At the moment of writing this blog, [React 18](https://reactjs.org/blog/2022/03/29/react-v18.html) was recently released and NextJs will install the latest React.
+
+Nextjs-remote-mdx had [issues](https://github.com/hashicorp/next-mdx-remote/pull/267) with React 18..
+
+So let's downgrade to React 17 before we continue.
+
+```
+$ cd dev-blogs
+$ rm package-lock.json
+$ vim package.json
+```
+
+And change the following:
+
+```
+From:
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+To:
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+```
+
+Run npm install to downgrade to React:
+
+```
+$ npm install
+```
+
+---
+
+### Installing and configuration for tailwindcss
+
+Follow [tailwindcss](https://https://tailwindcss.com/docs/guides/nextjs) setup instructions for [NextJs](https://nextjs.org/docs).
+
+```
+$ https://tailwindcss.com/docs/guides/nextjs
+$ npx tailwindcss init -p
+```
+
+Change the file styles/globals.css with the following content:
+
+```
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Optionally I added some base style to styles/globals.css for links and headings:
+
+```
+@layer base {
+    a {
+        @apply text-blue-600 hover:text-blue-500 dark:text-sky-400;
+    }
+    h1 {
+        @apply dark:text-gray-300 text-3xl;
+    }
+    h2 {
+        @apply text-2xl;
+    }
+    h3 {
+        @apply text-xl;
+    }
+}
+```
+
+---
+
+### Tailwindcss Typography setup
+
+Tailwindcss [Typography plugin](https://tailwindcss.com/docs/typography-plugin) will allow us to add more control to the styling of Markdown.
+
+Run the following command to install the plugin:
+
+```
+$ npm install -D @tailwindcss/typography
+```
+
+Also add the plugin to the tailwindcss configuration file, tailwind.config.js to look like this:
+
+```
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("@tailwindcss/typography")],
+};
+
+```
+
+---
+
+### Install nextjs-mdx-remote and other npm packages
+
+Now install [nextjs-mdx-remote](https://github.com/hashicorp/next-mdx-remote) and all other npm package dependencies:
+
+```
+$ npm install gray-matter --save
+$ npm install date-fns --save
+$ npm install next-mdx-remote --save
+```
+
+---
+
+### Build and Start NextJs
+
+Usually you only need to run "yarn dev" to start and test the server.
+
+However, for NextJs specially, I recommend to run "yarn build" often to verify everything is going well.
+
+So run 'yarn build' and verify you get something similar to this:
+
+```
+$ yarn build
+yarn run v1.22.18
+warning ../../../package.json: No license field
+$ next build
+info  - Checking validity of types
+info  - Creating an optimized production build
+info  - Compiled successfully
+info  - Collecting page data
+info  - Generating static pages (7/7)
+info  - Finalizing page optimization
+
+Page                                       Size     First Load JS
+┌ ● /                                      883 B          81.9 kB
+├   /_app                                  0 B              74 kB
+├ ○ /404                                   192 B          74.2 kB
+├ ○ /about                                 406 B          74.4 kB
+├ λ /api/hello                             0 B              74 kB
+└ ● /blog/[slug] (1216 ms)                 1.45 kB        82.5 kB
+    ├ /blog/first (413 ms)
+    ├ /blog/second (404 ms)
+    └ /blog/third (399 ms)
++ First Load JS shared by all              74 kB
+  ├ chunks/framework-5f4595e5518b5600.js   42 kB
+  ├ chunks/main-164920eac96bc1c7.js        28.3 kB
+  ├ chunks/pages/_app-5fa9fdd6b3ca8743.js  2.69 kB
+  ├ chunks/webpack-fd1bc4a65a80e5c8.js     968 B
+  └ css/1e649630731d38e8.css               3.49 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+
+✨  Done in 7.99s.
+```
+
+This usually indicates that there are not issues at the moment to compile and generate the static content.
+
+Now just run "yarn dev" to start the server and start coding.
+
+```
+$ yarn dev
+yarn run v1.22.18
+warning ../../../package.json: No license field
+$ next dev
+ready - started server on 0.0.0.0:3000, url: http://localhost:3000
+event - compiled client and server successfully in 1267 ms (151 modules)
+wait  - compiling...
+event - compiled successfully in 123 ms (101 modules)
+wait  - compiling /blog/[slug] (client and server)...
+event - compiled client and server successfully in 410 ms (444 modules)
+```
+
+---
+
+<h2> The Code </h2>
+
+We will not go over every detail instead we will focus on the changes and personal modifications we made.
+
+If you like to go every detail of the code, please watch [Harry Wolf's YouTube video](https://www.youtube.com/watch?v=vu9gPcPs3mY). He explains this on detail and very well.
+
+### Patching [Optional]
+
+Currently there is a [Pull Request](https://github.com/hswolff/blog-with-nextjs-and-tailwind/pull/2) waiting for merge.
+
+If this is merged by the time this post is publish, this will be obsolete.
+
+We recommend to start from a new project and add the changes describe on the YouTube video.
+
+However, we are providing steps to use the [original author github](https://github.com/hswolff/blog-with-nextjs-and-tailwind).
+
+First, clone original author git repo:
+
+```
+$ git clone https://github.com/hswolff/blog-with-nextjs-and-tailwind.git
+```
+
+Second, go to blog-with-nextjs-and-tailwind.git, and make sure package.json, has the following changes:
+
+```
+git diff -- package.json
+diff --git a/package.json b/package.json
+index c99a4c7..847d589 100644
+--- a/package.json
++++ b/package.json
+@@ -8,15 +8,15 @@
+     "start": "next start"
+   },
+   "dependencies": {
+-    "@tailwindcss/typography": "^0.4.0",
++    "@tailwindcss/typography": "^0.5.2",
+     "autoprefixer": "^10.2.4",
+     "date-fns": "^2.17.0",
+     "gray-matter": "^4.0.2",
+-    "next": "10.0.6",
+-    "next-mdx-remote": "^2.1.3",
++    "next": "12.1.5",
++    "next-mdx-remote": "^4.0.2",
+     "postcss": "^8.2.6",
+-    "react": "17.0.1",
+-    "react-dom": "17.0.1",
+-    "tailwindcss": "^2.0.3"
++    "react": "17.0.2",
++    "react-dom": "17.0.2",
++    "tailwindcss": "^3.0.24"
+   }
+ }
+```
+
+This is needed because we are working with latest Node and upgrades are needed for this blog.
+
+Remove yarn.lock file and run npm instal.
+
+```
+$ rm -f yarn.lock
+$ npm install
+```
+
+At this point, you should be able to run "yarn dev".
+
+```
+$ yarn dev
+```
+
+However there are some modifications and upgrades on the code that we will take on the next section.
+
+### Changes
+
+Here we will explain the changes we added to improve or fix current issues due to some packages upgrades.
+
+```
+
+Test test
+
+```
+
+---
