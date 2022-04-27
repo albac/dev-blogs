@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Note
+
+The following code was based on the following GitHub repo: [hswolff/blog-with-nextjs-and-tailwind](https://github.com/hswolff/blog-with-nextjs-and-tailwind)
+
 ## Getting Started
 
 First, run the development server:
