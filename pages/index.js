@@ -35,7 +35,7 @@ export async function getStaticProps() {
             posts: allPosts
                 .slice(0)
                 .reverse()
-                .map(({ data, content, slug }) => ({
+                .map(({ data, slug }) => ({
                     ...data,
                     date: data.date.toISOString(),
                     content: data.summary,
