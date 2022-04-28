@@ -1,9 +1,9 @@
 ---
 title: Blog with NextJs, Tailwind and Markdown
+date: 2022-04-28T00:00:45.510Z
 summary: |
-  Developing a blog using NextJs, Tailwind and Markdown.
-  Thi current website has been develop using the instructions on this blog.
-date: 2022-04-26T04:25:44.799Z
+    Developing a blog using NextJs, Tailwind and Markdown.
+    Thi current website has been develop using the instructions on this blog.
 ---
 
 The current webpage has been develop using the instructions on this blog.
@@ -14,7 +14,9 @@ Please watch and subscribe to his YouTube Channel:
 
 [![IMAGE_ALT](https://img.youtube.com/vi/vu9gPcPs3mY/2.jpg)](https://www.youtube.com/watch?v=vu9gPcPs3mY)
 
-You will find the code on my public repository as well as the fork/pull request changes requested to the original author.
+You will find the code of this page on my public [repository](https://github.com/albac/dev-blogs)
+
+Also I have opened a [pull request](https://github.com/hswolff/blog-with-nextjs-and-tailwind/pull/2) to the original author with the changes done on this blog.
 
 <h2>Requirements</h2>
 As you can tell by looking at my projects I use "vim" as a personal editor and use command line for most setups.
@@ -229,6 +231,8 @@ We will not go over every detail instead we will focus on the changes and person
 
 If you like to go every detail of the code, please watch [Harry Wolf's YouTube video](https://www.youtube.com/watch?v=vu9gPcPs3mY). He explains this on detail and very well.
 
+---
+
 ### Patching [Optional]
 
 Currently there is a [Pull Request](https://github.com/hswolff/blog-with-nextjs-and-tailwind/pull/2) waiting for merge.
@@ -294,14 +298,109 @@ $ yarn dev
 
 However there are some modifications and upgrades on the code that we will take on the next section.
 
-### Changes
+---
+
+### Changes for next-mdx-remote
 
 Here we will explain the changes we added to improve or fix current issues due to some packages upgrades.
 
+[Breaking release](https://github.com/hashicorp/next-mdx-remote/releases/tag/3.0.0) Next-mdx-remote V3 included internal rewrites from V2
+
+This blog is using next-mdx-remote 4.0.2.
+
+So we need to change the following file [pages/blog/[slug].js](https://github.com/albac/dev-blogs/blob/main/pages/blog/%5Bslug%5D.js).
+
+```
+-import renderToString from 'next-mdx-remote/render-to-string';
+-import hydrate from 'next-mdx-remote/hydrate';
++import { serialize } from 'next-mdx-remote/serialize';
++import { MDXRemote } from 'next-mdx-remote';
 ```
 
-Test test
+Hydrate function is not longer necessary instead you can use MDXRemote directly to hydrate the markdown content:
 
 ```
+<MDXRemote {...content} />
+```
+
+renderToString has been replaced with serialize:
+
+```
+-  const mdxSource = await renderToString(content);
++  const mdxSource = await serialize(content);
+```
+
+---
+
+### Generate date and create mdx file:
+
+On Harry video tutoria he uses node command line to generate the date that will use on the mdx content file.
+
+We are using a similar command line but we want to create the file with a name we can sort by date on the home page.
+
+```
+$ node -e 'console.log(new Date().toISOString(), new Date().getTime())'
+2022-04-27T23:34:37.161Z 1651102477161
+```
+
+With this we can create the file with the name from the getTime output and the date on the content from toISOString output.
+
+```
+$ vim mdxfiles/1651102477161.mdx
+---
+title: Blog with NextJs, Tailwind and Markdown
+summary: |
+  Short description
+date: 2022-04-27T23:34:37.161Z
+---
+
+Some content here....
+
+```
+
+Now let's modify the [index.js](https://github.com/albac/dev-blogs/blob/main/pages/index.js#L35) file and reverse array order, so we get the latest blog on top.
+
+Use slice(0).reverse.map to reverse the array:
+
+```
+posts: allPosts
+    .slice(0)
+    .reverse()
+    .map(({ data, slug }) => ({
+        ...data,
+        date: data.date.toISOString(),
+        content: data.summary,
+        slug,
+    })),
+
+```
+
+---
+
+### Use typography plugin and prose
+
+Tailwindcss provides typography plugin to give more control and styling to markdown.
+
+We use the instructions from the [tailwindcss/typography](https://tailwindcss.com/docs/typography-plugin) documentation.
+
+```
+<article className="prose dark:prose-invert text-slate-600 dark:text-slate-300 font-light font-sans">
+    <MDXRemote {...content} />
+</article>
+
+```
+
+We use prose class and we can use html tags on the markdown:
+
+```
+<h2>The setup</h2>
+
+Make sure you have the latest [node](https://nodejs.org/en/download/current/) installed:
+
+```
+
+The end result can be seen in this page style.
+
+Compare this page to the [GitHub link]() to see the difference.
 
 ---
