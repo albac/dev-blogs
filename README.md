@@ -1,38 +1,336 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Building a Markdown blog using Next.js and Tailwind Typography
 
-## Note
+---
 
-The following code was based on the following GitHub repo: [hswolff/blog-with-nextjs-and-tailwind](https://github.com/hswolff/blog-with-nextjs-and-tailwind)
+The current webpage has been developed using the instructions in this blog.
 
-## Getting Started
+This guide follows [Harry Wolf's YouTube tutorial video](https://www.youtube.com/watch?v=vu9gPcPs3mY) with some personal modifications we added.
 
-First, run the development server:
+Please watch and subscribe to [his YouTube Channel](https://www.youtube.com/watch?v=vu9gPcPs3mY):
 
-```bash
-npm run dev
-# or
-yarn dev
+[![IMAGE_ALT](https://img.youtube.com/vi/vu9gPcPs3mY/2.jpg)](https://www.youtube.com/watch?v=vu9gPcPs3mY)
+
+You will find the code of this page on my public [repository](https://github.com/albac/dev-blogs)
+
+Also, I have opened a [pull request](https://github.com/hswolff/blog-with-nextjs-and-tailwind/pull/2) to the original author with the changes made to this blog.
+
+## Requirements
+
+As you can tell by looking at my projects I use [**```neovim```**](https://neovim.io/) as a personal editor and use command line for most setups.
+
+For this specific project, we will use the following:
+
+```
+- Node v18.0.0
+- NextJs v11.1.0
+- React 17.0.2
+- Tailwindcss 3.0.24
+- nextjs-mdx-remote from harshicorp
+- Other NPM packages: date-fns, gray-matter
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## The setup
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Make sure you have the latest version of [Node](https://nodejs.org/en/download/current/) installed:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+$ node --version
+v18.0.0
+```
 
-## Learn More
+### Creating Next.js project
 
-To learn more about Next.js, take a look at the following resources:
+We recommend starting from a new project and adding the changes described in the YouTube video. However, you can also clone the [original author's GitHub](https://github.com/hswolff/blog-with-nextjs-and-tailwind).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To create a new project just run the following for creating new [**```Next.js```** Project with **```Tailwind```**](https://tailwindcss.com/docs/guides/nextjs):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+$ npx create-next-app@latest dev-blog --typescript --eslint
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Installing and configuration for tailwindcss
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Next install **```tailwind```** and other dependencies by running:
+
+```bash
+$ cd dev-blog
+$ npm install -D tailwindcss postcss autoprefixer
+$ npx tailwindcss init -p
+```
+
+Change the file **```styles/globals.css```** with the following content:
+
+```
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Optionally, I added some base style to styles/globals.css for links and headings:
+
+```
+@layer base {
+    a {
+        @apply text-blue-600 hover:text-blue-500 dark:text-sky-400;
+    }
+    h1 {
+        @apply dark:text-gray-300 text-3xl;
+    }
+    h2 {
+        @apply text-2xl;
+    }
+    h3 {
+        @apply text-xl;
+    }
+}
+```
+
+---
+
+### Tailwindcss Typography setup
+
+The Tailwind CSS [Typography plugin](https://tailwindcss.com/docs/typography-plugin) will allow us to have more control over the styling of Markdown.
+
+Run the following command to install the plugin:
+
+```
+$ npm install -D @tailwindcss/typography
+```
+
+Also, add the plugin to the Tailwind CSS configuration file, **```tailwind.config.js```**, to look like this:
+
+```
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("@tailwindcss/typography")],
+};
+
+```
+
+---
+
+### Install nextjs-mdx-remote and other npm packages
+
+Now install [nextjs-mdx-remote](https://github.com/hashicorp/next-mdx-remote) and all other NPM package dependencies:
+
+```
+$ npm install gray-matter --save
+$ npm install date-fns --save
+$ npm install next-mdx-remote --save
+```
+
+---
+
+## The Code
+
+Here we will explain the changes we made to improve and fix current issues due to some package upgrades. 
+First, we follow almost the same changes as the original author.
+Second, during the video instruction the author was using renderString and hydrate functions, that changed on the future releases of **Next-MDX-Remote**.
+Finally, we added [Tailwind Typography](https://tailwindcss.com/docs/typography-plugin) which helps to improve the styles of the markdown and show a more stylish look to our blog.
+See all the code changes for this project at my [github repo](https://github.com/albac/dev-blogs).
+
+---
+
+### Generating date and creating mdx file::
+
+To generate the date for the MDX content, Harry uses a Node command line, which we will also be using. However, we want to create the file with a name that can be sorted by date on the home page.
+
+Using the command below, we can get the date from the **```toISOString()```** output and the name for the file from the **```getTime()```** output:
+
+```bash
+$ node -e 'console.log(new Date().toISOString(), new Date().getTime())'
+2022-04-27T23:34:37.161Z 1651102477161
+```
+
+We can then create the file using the name from **```getTime()```** and the date from **```toISOString()```**:
+
+```
+$ vim mdxfiles/1651102477161.mdx
+---
+title: Blog with NextJs, Tailwind and Markdown
+summary: |
+  Short description
+date: 2022-04-27T23:34:37.161Z
+---
+
+Some content here....
+
+```
+
+Now let's modify the [```index.js```](https://github.com/albac/dev-blogs/blob/main/pages/index.js#L35) file and reverse array order, so we get the latest blog on top.
+
+Use **```slice(0).reverse.map```** to reverse the array:
+
+To display the latest blog post on top, we need to modify the [```index.js```](https://github.com/albac/dev-blogs/blob/main/pages/index.js#L35) file and reverse the order of the array. We can use slice(0).reverse().map() to reverse the array, as shown below:
+
+```
+posts: allPosts
+    .slice(0)
+    .reverse()
+    .map(({ data, slug }) => ({
+        ...data,
+        date: data.date.toISOString(),
+        content: data.summary,
+        slug,
+    })),
+
+```
+
+---
+
+### Get Posts
+Create a directory called **```mdxfiles```** and place all your markdowns.
+And let's create the [```GetAllPost library```](https://github.com/albac/dev-blogs/blob/main/lib/data.js) that will get all post from our directory:
+
+```
+export function getAllPosts() {
+  const allPosts = fs.readdirSync(contentDirectory);
+  // console.log(allPosts);
+
+  return allPosts.map((fileName) => {
+    const slug = fileName.replace(".mdx", "");
+    const fileContents = fs.readFileSync(
+      path.join(contentDirectory, fileName),
+      "utf8"
+    );
+    const { data, content } = matter(fileContents);
+    // console.log(data, content);
+    return {
+      data,
+      content,
+      slug,
+    };
+  });
+}
+```
+
+---
+
+
+
+### Changes for next-mdx-remote
+
+The [breaking release Next-mdx-remote V3](https://github.com/hashicorp/next-mdx-remote/releases/tag/3.0.0) included internal rewrites from V2. This blog is using next-mdx-remote 4.0.2, so we need to change the following file: [```pages/blog/[slug].js```](https://github.com/albac/dev-blogs/blob/main/pages/blog/%5Bslug%5D.js) .
+
+```
+-import renderToString from 'next-mdx-remote/render-to-string';
+-import hydrate from 'next-mdx-remote/hydrate';
++import { serialize } from 'next-mdx-remote/serialize';
++import { MDXRemote } from 'next-mdx-remote';
+```
+
+The hydrate function is no longer necessary, and you can use MDXRemote directly to hydrate the markdown content:
+
+```
+<MDXRemote {...content} />
+```
+
+The **```renderToString```** function has been replaced with **```serialize```**:
+
+```
+-  const mdxSource = await renderToString(content);
++  const mdxSource = await serialize(content);
+```
+
+---
+
+### Using typography plugin and prose
+
+We can also use Tailwind's typography plugin to style the markdown. Follow the instructions in the [```tailwindcss/typography```](https://tailwindcss.com/docs/typography-plugin) documentation. We can use the **```prose```** class to add styles and also use HTML tags in the markdown.
+
+```
+<article className="prose dark:prose-invert text-slate-600 dark:text-slate-300 font-light font-sans">
+    <MDXRemote {...content} />
+</article>
+
+```
+
+Here's an example of how we use **```h2 tags```** on the markdown:
+
+```
+<h2>The setup</h2>
+
+Make sure you have the latest [node](https://nodejs.org/en/download/current/) installed:
+
+```
+
+We're also using **```dark:prose-inverse```** to enable the use of our dark theme on the markdown.
+
+
+---
+
+### Build and Start NextJs
+
+Usually, you only need to run **```yarn dev```** to start and test the server. However, for Next.js, I recommend running "yarn build" frequently to ensure that everything is going well. So, run **```yarn build```** and verify that you get output similar to this:
+
+```
+$ yarn build
+yarn run v1.22.18
+warning ../../../package.json: No license field
+$ next build
+info  - Checking validity of types
+info  - Creating an optimized production build
+info  - Compiled successfully
+info  - Collecting page data
+info  - Generating static pages (7/7)
+info  - Finalizing page optimization
+
+Page                                       Size     First Load JS
+┌ ● /                                      883 B          81.9 kB
+├   /_app                                  0 B              74 kB
+├ ○ /404                                   192 B          74.2 kB
+├ ○ /about                                 406 B          74.4 kB
+├ λ /api/hello                             0 B              74 kB
+└ ● /blog/[slug] (1216 ms)                 1.45 kB        82.5 kB
+    ├ /blog/first (413 ms)
+    ├ /blog/second (404 ms)
+    └ /blog/third (399 ms)
++ First Load JS shared by all              74 kB
+  ├ chunks/framework-5f4595e5518b5600.js   42 kB
+  ├ chunks/main-164920eac96bc1c7.js        28.3 kB
+  ├ chunks/pages/_app-5fa9fdd6b3ca8743.js  2.69 kB
+  ├ chunks/webpack-fd1bc4a65a80e5c8.js     968 B
+  └ css/1e649630731d38e8.css               3.49 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+
+✨  Done in 7.99s.
+```
+This output indicates that there are no issues currently with compiling and generating the static content. Now, just run **```yarn dev```** to start the server and start coding:
+
+```
+$ yarn dev
+yarn run v1.22.18
+warning ../../../package.json: No license field
+$ next dev
+ready - started server on 0.0.0.0:3000, url: http://localhost:3000
+event - compiled client and server successfully in 1267 ms (151 modules)
+wait  - compiling...
+event - compiled successfully in 123 ms (101 modules)
+wait  - compiling /blog/[slug] (client and server)...
+event - compiled client and server successfully in 410 ms (444 modules)
+```
+
+Lastly, the end result can be seen on this page style. Compare it to the [GitHub link](https://github.com/albac/dev-blogs/blob/main/mdxfiles/1651104045510.mdx) to see the difference.
+
+<article className="prose xl:prose-2xl bg-white space-y-2 space-x-2 p-4 rounded">
+<div>
+[![IMAGE_ALT](https://github.com/albac/dev-blogs/raw/main/images/typography.png)](https://github.com/albac/dev-blogs/raw/main/images/typography.png)
+</div>
+</article>
+
+---
+
+
